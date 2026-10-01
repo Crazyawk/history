@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The First Battle of the Marne</title>
+<style>
+:root{
+  --paper:#f1ead9;--ink:#1b1e25;--ink-soft:#565a68;--line:#c9ba96;
+  --allied:#1f4f7d;--german:#9a2c2c;--brass:#ac7d26;
+  --serif:Georgia,"Times New Roman",serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --shadow:0 18px 46px rgba(28,24,15,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--sans);color:var(--ink);overflow:hidden;background:var(--paper)}
+img{display:block}
+
+#glow{position:fixed;z-index:52;pointer-events:none;width:440px;height:440px;margin:-220px 0 0 -220px;border-radius:50%;
+  mix-blend-mode:soft-light;opacity:.9;background:radial-gradient(circle,rgba(255,228,160,.75),rgba(255,228,160,0) 62%)}
+#crosshair{position:fixed;z-index:51;pointer-events:none;width:30px;height:30px;margin:-15px 0 0 -15px;opacity:.35;transition:opacity .3s}
+#crosshair::before,#crosshair::after{content:"";position:absolute;background:var(--ink)}
+#crosshair::before{left:14px;top:0;width:2px;height:30px}#crosshair::after{top:14px;left:0;height:2px;width:30px}
+
+.deck{position:fixed;inset:0;z-index:1}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transform:scale(1.012);transition:opacity .5s,transform .6s,visibility .5s;overflow:hidden}
+.slide.is-active{opacity:1;visibility:visible;transform:none}
+.pad{position:relative;z-index:3;height:100%;padding:clamp(18px,3.6vh,36px) clamp(20px,3.6vw,54px) 70px;display:flex;flex-direction:column}
+
+.rise{opacity:0;transform:translateY(20px);transition:opacity .65s,transform .65s}
+.is-active .rise{opacity:1;transform:none}
+.is-active .r1{transition-delay:.05s}.is-active .r2{transition-delay:.14s}.is-active .r3{transition-delay:.23s}
+.is-active .r4{transition-delay:.32s}.is-active .r5{transition-delay:.41s}.is-active .r6{transition-delay:.5s}
+
+.eyebrow{font-weight:800;letter-spacing:.24em;text-transform:uppercase;font-size:clamp(10px,.98vw,13px);color:var(--brass)}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(36px,6.3vw,92px);line-height:.95;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.7vw,50px);line-height:1;letter-spacing:-.01em}
+h3{font-family:var(--serif);font-weight:700;font-size:clamp(16px,1.6vw,22px)}
+p{font-size:clamp(12.5px,1.26vw,16px);line-height:1.46}
+.lede{font-size:clamp(13px,1.42vw,18px);line-height:1.48;color:var(--ink-soft)}
+.muted{color:var(--ink-soft)}.aa{color:var(--allied)}.ag{color:var(--german)}.ab{color:var(--brass)}
+.serif{font-family:var(--serif)}
+
+.plate{position:relative;background:#fbf7ec;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.corner{position:absolute;width:13px;height:13px;border:2px solid var(--brass);opacity:.5;z-index:6}
+.corner.tl{left:7px;top:7px;border-right:0;border-bottom:0}.corner.tr{right:7px;top:7px;border-left:0;border-bottom:0}
+.corner.bl{left:7px;bottom:7px;border-right:0;border-top:0}.corner.br{right:7px;bottom:7px;border-left:0;border-top:0}
+.cap{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:11px 13px;color:#f3ecda;font-size:clamp(10.5px,1.05vw,13.5px);line-height:1.35;background:linear-gradient(0deg,rgba(16,13,8,.93),rgba(16,13,8,.35) 65%,transparent)}
+.stamp{position:absolute;z-index:6;width:84px;height:84px;border:3px double var(--german);border-radius:50%;color:var(--german);display:flex;align-items:center;justify-content:center;text-align:center;font:800 9.5px/1.15 var(--sans);letter-spacing:.06em;text-transform:uppercase;transform:rotate(-13deg);opacity:.72;padding:7px}
+
+/* photo-over-illustration slot */
+.photoslot{position:relative;overflow:hidden}
+.photoslot .ph{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.03)}
+.photoslot .illus{position:absolute;inset:0;z-index:1;width:100%;height:100%}
+
+.chip{display:inline-flex;align-items:baseline;gap:6px;color:var(--ink);background:#fbf7ec;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:clamp(10.5px,1.05vw,13.5px);box-shadow:0 4px 12px rgba(28,24,15,.07)}
+.chip b{font-family:var(--serif);font-size:1.16em}
+.factstrip{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:10px}
+.rail{display:flex;flex-direction:column;gap:8px}
+.note{background:#fbf7ec;border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:8px;padding:9px 11px}
+.note .k{font:800 9.5px var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--brass)}
+.note p{margin-top:2px}.note.a{border-left-color:var(--allied)}.note.g{border-left-color:var(--german)}
+.statbig{font-family:var(--serif);font-weight:700;line-height:.9}
+.bar{height:11px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar>span{display:block;height:100%;width:0;transition:width 1.3s cubic-bezier(.2,.7,.2,1)}
+.is-active .bar>span{width:var(--w)}
+
+.layer{position:absolute;left:0;right:0;will-change:transform}
+
+.tilt{transform-style:preserve-3d;transition:box-shadow .25s}
+.tilt .glare{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(440px circle at var(--gx,50%) var(--gy,50%),rgba(255,255,255,.5),transparent 46%)}
+.tilt:hover .glare{opacity:1}
+.spotwrap .spot{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(190px circle at var(--px,50%) var(--py,50%),rgba(0,0,0,0) 0,rgba(10,8,4,.34) 62%)}
+.spotwrap:hover .spot{opacity:1}
+
+/* interactive map pins */
+.pin{position:absolute;z-index:5;width:15px;height:15px;border-radius:50%;background:var(--brass);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.45);transform:translate(-50%,-50%);cursor:pointer;animation:pinp 2.2s infinite}
+.pin.a{background:var(--allied)}.pin.g{background:var(--german)}
+@keyframes pinp{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,.45),0 0 0 0 rgba(172,125,38,.5)}50%{box-shadow:0 2px 6px rgba(0,0,0,.45),0 0 0 9px rgba(172,125,38,0)}}
+.pin::after{content:attr(data-tip);position:absolute;left:50%;top:-9px;transform:translate(-50%,-100%);background:var(--ink);color:#fff;font:600 11px var(--sans);padding:5px 9px;border-radius:7px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:7}
+.pin:hover::after{opacity:1;transform:translate(-50%,-108%)}
+.pin:hover{animation:none;transform:translate(-50%,-50%) scale(1.25)}
+
+.flow{fill:none;stroke-linecap:round;stroke-dasharray:var(--len,900);stroke-dashoffset:var(--len,900)}
+.flow.german{stroke:var(--german)}.flow.allied{stroke:var(--allied)}
+.is-active .flow.go{animation:draw 1.7s ease forwards}
+.is-active .flow.go.d2{animation-delay:.45s}.is-active .flow.go.d3{animation-delay:.9s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.ring{fill:none;stroke:var(--allied);stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center}
+.is-active .ring.go{animation:ringp 2.4s .7s ease-out infinite}
+@keyframes ringp{0%{opacity:.9;transform:scale(.5)}70%{opacity:0;transform:scale(1.5)}100%{opacity:0}}
+
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.side{position:relative;border-radius:13px;padding:14px 16px;background:#fbf7ec;border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;overflow:hidden;display:flex;flex-direction:column}
+.side .lbar{position:absolute;left:0;top:0;bottom:0;width:6px}.side.allied .lbar{background:var(--allied)}.side.german .lbar{background:var(--german)}
+.side .flag{font-family:var(--serif);font-weight:700;font-size:clamp(17px,2vw,27px)}
+.side.allied .flag{color:var(--allied)}.side.german .flag{color:var(--german)}
+.side .goal{margin-top:9px;max-height:0;opacity:0;overflow:hidden;transition:max-height .5s,opacity .4s}
+.side.open .goal{max-height:220px;opacity:1}
+.side .tap{position:absolute;top:11px;right:13px;font:800 9.5px var(--sans);letter-spacing:.11em;text-transform:uppercase;color:var(--brass)}
+.side.open .tap{opacity:0}
+
+.commander{position:relative;border-radius:11px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer}
+.commander .lab{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:9px 10px 8px;color:#f4edda;background:linear-gradient(0deg,rgba(14,11,7,.94),transparent)}
+.commander .lab b{font-family:var(--serif);font-size:clamp(12px,1.3vw,16px)}
+.commander .lab span{display:block;font-size:10.5px;opacity:.85}
+
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.wcard{position:relative;background:#fbf7ec;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;gap:7px;box-shadow:0 7px 18px rgba(28,24,15,.08)}
+.wcard svg{width:32px;height:32px;color:var(--ink)}
+.wcard .wdesc{max-height:0;opacity:0;overflow:hidden;transition:max-height .45s,opacity .35s;color:var(--ink-soft)}
+.wcard.open{background:#fdf2db;border-color:var(--brass)}.wcard.open .wdesc{max-height:180px;opacity:1}
+.wcard.star{background:#fdeecf;border-color:var(--brass)}.wcard.star svg{color:var(--brass)}
+
+.qopts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:840px}
+.qopt{text-align:left;font:700 clamp(13.5px,1.45vw,18px)/1.3 var(--sans);padding:13px 15px;border-radius:11px;cursor:pointer;background:#fbf7ec;border:2px solid var(--line);color:var(--ink);transition:transform .18s,border-color .2s,background .2s;display:flex;gap:10px;align-items:center}
+.qopt .key{width:27px;height:27px;flex:none;border-radius:7px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.qopt:hover{transform:translateX(4px);border-color:var(--brass)}
+.qopt.correct{background:#e7f1e7;border-color:#3f8a4e;color:#235c30}.qopt.correct .key{background:#3f8a4e}
+.qopt.wrong{background:#f6e7e7;border-color:#b45;color:#8a2e2e;opacity:.82}
+.qnote{font-family:var(--serif);font-style:italic;font-size:clamp(14px,1.6vw,20px);color:var(--allied);min-height:1.4em;margin-top:4px}
+
+.progress{position:fixed;top:0;left:0;height:4px;background:var(--brass);z-index:40;transition:width .5s;box-shadow:0 0 10px rgba(172,125,38,.6)}
+.topmeta{position:fixed;top:12px;right:16px;z-index:35;display:flex;gap:8px;align-items:center;font:800 10.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);background:#fbf7ecd0;backdrop-filter:blur(6px);padding:6px 11px;border-radius:20px;border:1px solid var(--line)}
+.dot{width:9px;height:9px;border-radius:50%;background:#bbb}.dot.live{background:#3f8a4e;animation:pulse 2s infinite}.dot.err{background:var(--german)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(63,138,78,.18)}50%{box-shadow:0 0 0 7px rgba(63,138,78,.05)}}
+.nav{position:fixed;left:14px;bottom:12px;z-index:40;display:flex;gap:6px;align-items:center}
+.nav button{width:42px;height:42px;border-radius:11px;border:1px solid var(--line);background:#fbf7ecd0;backdrop-filter:blur(6px);color:var(--ink);font-size:18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s,background .2s}
+.nav button:hover{transform:translateY(-2px);background:#fff}
+.nav .count{font:800 12.5px var(--sans);color:var(--ink-soft);padding:0 8px;min-width:54px;text-align:center}
+.viewer-locked .nav .arrows{display:none}
+.hint{position:fixed;left:50%;bottom:13px;transform:translateX(-50%);z-index:30;font:700 10.5px var(--sans);letter-spacing:.04em;color:var(--ink-soft);background:#fbf7ecd0;backdrop-filter:blur(6px);padding:6px 12px;border-radius:20px;border:1px solid var(--line);opacity:.85;transition:opacity .6s;pointer-events:none}
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(26,23,15,.55);display:none;align-items:center;justify-content:center;padding:24px}
+.overlay.show{display:flex}
+.panel{background:var(--paper);max-width:600px;width:100%;border-radius:18px;padding:24px 26px 28px;box-shadow:0 40px 90px rgba(0,0,0,.4);max-height:88vh;overflow:auto;border:1px solid var(--line)}
+.panel h3{font-size:24px;margin-bottom:6px}.panel p{color:var(--ink-soft);margin:7px 0}
+.panel ol{margin:10px 0 10px 20px;line-height:1.6}.panel code{background:#efe7d4;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:13px ui-monospace,Menlo,monospace;word-break:break-all}
+.panel .row{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.panel input{flex:1;min-width:190px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font:14px ui-monospace,Menlo,monospace;background:#fff}
+.panel button.go{padding:11px 17px;border:none;border-radius:10px;background:var(--ink);color:#fff;font-weight:700;cursor:pointer}
+.panel .linkbox{background:#fff;border:1px dashed var(--brass);border-radius:10px;padding:11px 13px;margin-top:9px;font:13px ui-monospace,Menlo,monospace;word-break:break-all;cursor:pointer}
+.panel .tagrow{display:flex;gap:8px;margin:10px 0 4px}.panel .tag{font:800 10px var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:20px;background:#efe7d4;color:var(--ink-soft)}.panel .tag.on{background:var(--allied);color:#fff}
+
+@media (max-width:880px){.wgrid{grid-template-columns:repeat(2,1fr)}.sides{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="glow"></div><div id="crosshair"></div>
+<div class="progress" id="progress"></div>
+<div class="topmeta"><span id="modeLabel">Self-navigate</span><span class="dot" id="statusDot"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- ===== 1 · TITLE ===== -->
+  <section class="slide" id="s1">
+    <div class="photoslot" style="position:absolute;inset:0;z-index:0">
+      <img class="ph" data-depth="18" src="title-soldiers.png" alt="">
+      <div class="illus">
+        <div class="layer" style="inset:0;background:linear-gradient(180deg,#c6d2d8,#d9d6c3 55%,#c3bd96)"></div>
+        <div class="layer" style="inset:0;background:radial-gradient(60% 50% at 70% 38%,rgba(255,241,205,.85),transparent 70%)" data-depth="6"></div>
+        <div class="layer" style="bottom:30%;height:150px" data-depth="10">
+          <svg viewBox="0 0 1200 150" preserveAspectRatio="xMidYMax meet" style="width:100%;height:100%"><g fill="#9a926f" opacity=".65">
+            <rect x="120" y="60" width="40" height="90"/><rect x="175" y="80" width="30" height="70"/><rect x="230" y="50" width="46" height="100"/>
+            <path d="M980 150 L1000 30 L1020 150 Z"/><rect x="1006" y="12" width="8" height="40"/><rect x="760" y="70" width="38" height="80"/><rect x="880" y="60" width="34" height="90"/>
+            <circle cx="420" cy="82" r="26"/><rect x="412" y="50" width="16" height="30"/></g></svg>
+        </div>
+        <div class="layer" style="bottom:12%;height:150px" data-depth="20">
+          <svg viewBox="0 0 1200 150" preserveAspectRatio="xMidYMax meet" style="width:100%;height:100%">
+            <defs><g id="sol"><circle cx="20" cy="14" r="9"/><path d="M11 24 h18 l-2 46 h-5 l-2 -30 l-2 30 h-5 Z"/><rect x="8" y="26" width="24" height="7" rx="2"/><line x1="30" y1="8" x2="36" y2="70" stroke-width="3"/></g></defs>
+            <g fill="#6d6447" stroke="#6d6447" opacity=".8"><use href="#sol" x="60" y="60"/><use href="#sol" x="170" y="56"/><use href="#sol" x="290" y="60"/><use href="#sol" x="410" y="58"/><use href="#sol" x="530" y="60"/><use href="#sol" x="650" y="56"/><use href="#sol" x="770" y="60"/><use href="#sol" x="890" y="58"/><use href="#sol" x="1010" y="60"/><use href="#sol" x="1120" y="58"/></g></svg>
+        </div>
+        <div class="layer" style="bottom:0;height:220px" data-depth="32">
+          <svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax meet" style="width:100%;height:100%">
+            <g fill="#2a2518" stroke="#2a2518"><use href="#sol" x="40" y="76" transform="scale(1.7)"/><use href="#sol" x="230" y="82" transform="scale(1.6)"/><use href="#sol" x="430" y="74" transform="scale(1.75)"/><use href="#sol" x="640" y="80" transform="scale(1.62)"/><use href="#sol" x="860" y="76" transform="scale(1.7)"/><use href="#sol" x="1060" y="82" transform="scale(1.6)"/></g>
+            <rect x="0" y="192" width="1200" height="30" fill="#241f14"/></svg>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(18,15,9,.78),rgba(18,15,9,.3) 50%,transparent 80%)"></div>
+    <div class="pad" style="justify-content:flex-end;color:#f6f0e2">
+      <div class="eyebrow rise r1" style="color:#eac36f" data-depth="5">World War I · The Western Front · 1914</div>
+      <h1 class="rise r2" data-depth="11" style="margin-top:8px">The First Battle<br>of the <span class="ab">Marne</span></h1>
+      <p class="serif rise r3" style="font-style:italic;font-size:clamp(17px,2.2vw,30px);color:#eac36f;margin-top:12px" data-depth="8">"The Miracle on the Marne" — the six days that stopped Germany and saved Paris.</p>
+      <div class="factstrip rise r4" data-depth="4" style="margin-top:14px">
+        <span class="chip" style="background:#fbf7ecee"><b>Sept 5–12</b> 1914</span><span class="chip" style="background:#fbf7ecee"><b>~2M</b> troops</span>
+        <span class="chip" style="background:#fbf7ecee"><b>40 km</b> from Paris</span><span class="chip" style="background:#fbf7ecee"><b>~500k</b> casualties</span>
+        <span class="chip" style="background:#fbf7ecee"><b>6</b> days</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 2 · WHO FOUGHT + COMMANDERS ===== -->
+  <section class="slide" id="s2">
+    <div class="pad">
+      <div class="eyebrow rise r1">The two sides · the opposing plans · the commanders</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">Who fought, and for what?</h2>
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;flex:1;min-height:0">
+        <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+          <div class="sides" style="flex:1">
+            <div class="side allied tilt rise r2" data-side><span class="glare"></span><span class="lbar"></span><span class="tap">Tap</span>
+              <p class="flag">France + Britain</p><p class="muted" style="margin-top:1px">The Allied Powers</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px"><span class="chip"><b>980k</b> French</span><span class="chip"><b>100k</b> British</span><span class="chip"><b>~3,000</b> guns</span></div>
+              <div class="goal"><p><b>Aim:</b> halt the advance before Paris, then wheel and strike the exposed German flank.</p></div>
+            </div>
+            <div class="side german tilt rise r3" data-side><span class="glare"></span><span class="lbar"></span><span class="tap">Tap</span>
+              <p class="flag">Germany</p><p class="muted" style="margin-top:1px">The attacker</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px"><span class="chip"><b>750k</b> troops</span><span class="chip"><b>~3,300</b> guns</span><span class="chip"><b>40 days</b> to win</span></div>
+              <div class="goal"><p><b>Aim:</b> the Schlieffen Plan — sweep through Belgium, take Paris, beat France in six weeks before Russia was ready.</p></div>
+            </div>
+          </div>
+          <div class="note rise r4"><span class="k">The setup</span><p>By early September the Germans had driven the Allies 250 km south in the "Great Retreat" and stood 40 km from Paris. The French government had fled to Bordeaux on September 2. Then von Kluck made his fateful turn.</p></div>
+          <div class="note a rise r4"><span class="k">The spark of the counterattack</span><p>Gallieni, military governor of Paris, saw Kluck's army cross his front and said: "They offer us their flank." He pushed Joffre to attack at once.</p></div>
+        </div>
+        <div class="rail rise r4" style="min-height:0">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;min-height:0">
+            <div class="commander photoslot tilt" style="grid-column:1 / span 2;min-height:120px"><span class="glare"></span>
+              <img class="ph" src="joffre.png" alt=""><div class="illus"><svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%"><rect width="300" height="150" fill="#d8cca8"/><circle cx="150" cy="70" r="42" fill="#b7a97e"/><circle cx="150" cy="56" r="21" fill="#8a7f61"/><path d="M108 128 q42 -34 84 0 Z" fill="#8a7f61"/><rect x="124" y="42" width="52" height="15" rx="7" fill="#6d6447"/></svg></div>
+              <div class="lab"><b>Gen. Joseph Joffre</b><span>French commander-in-chief — chose the moment to strike</span></div>
+            </div>
+            <div class="commander photoslot tilt" style="min-height:90px"><span class="glare"></span>
+              <img class="ph" src="gallieni.png" alt=""><div class="illus"><svg viewBox="0 0 150 120" style="width:100%;height:100%"><rect width="150" height="120" fill="#d2c6a2"/><circle cx="75" cy="54" r="30" fill="#b7a97e"/><circle cx="75" cy="44" r="15" fill="#8a7f61"/><path d="M48 104 q27 -24 54 0 Z" fill="#8a7f61"/></svg></div>
+              <div class="lab"><b>Gallieni</b><span>Governor of Paris</span></div>
+            </div>
+            <div class="commander photoslot tilt" style="min-height:90px"><span class="glare"></span>
+              <img class="ph" src="kluck.png" alt=""><div class="illus"><svg viewBox="0 0 150 120" style="width:100%;height:100%"><rect width="150" height="120" fill="#cdbf9b"/><circle cx="75" cy="54" r="30" fill="#9a2c2c" opacity=".4"/><circle cx="75" cy="44" r="15" fill="#8a7f61"/><path d="M48 104 q27 -24 54 0 Z" fill="#8a7f61"/></svg></div>
+              <div class="lab"><b>von Kluck</b><span>German 1st Army</span></div>
+            </div>
+          </div>
+          <div class="note g"><span class="k">German high command</span><p>Moltke (chief of staff, 300 km away in Luxembourg), Kluck (1st Army), Bülow (2nd Army).</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3 · THE ADVANCE ===== -->
+  <section class="slide" id="s3">
+    <div class="pad">
+      <div class="eyebrow rise r1">Early September 1914 · the German tide</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">Germany sweeps toward <span class="ag">Paris</span></h2>
+      <div style="display:grid;grid-template-columns:1.6fr .9fr;gap:14px;flex:1;min-height:0">
+        <div class="plate spotwrap photoslot rise r2" style="min-height:0"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="spot"></div>
+          <img class="ph" src="advance-map.png" alt="">
+          <div class="illus"><svg viewBox="0 0 1000 540" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect width="1000" height="540" fill="#efe7d2"/><path d="M40,60 L470,40 L520,10 L930,70 L950,490 L80,510 Z" fill="#e6dcc0" stroke="#c9ba96" stroke-width="2"/>
+            <path d="M250,150 C470,120 660,120 880,150" fill="none" stroke="#7fa6c0" stroke-width="4" opacity=".7"/><text x="640" y="118" fill="#5c7f99" font-family="Georgia" font-style="italic" font-size="18">Aisne R.</text>
+            <path d="M300,250 C480,215 650,205 840,235" fill="none" stroke="#7fa6c0" stroke-width="4.5"/><text x="560" y="200" fill="#5c7f99" font-family="Georgia" font-style="italic" font-size="20">Marne R.</text>
+            <circle cx="360" cy="330" r="11" fill="#17191f"/><text x="328" y="368" fill="#1b1e25" font-family="Georgia" font-weight="700" font-size="20">PARIS</text>
+            <text x="640" y="90" fill="#9a2c2c" font-weight="800" font-size="15">GERMAN ARMIES</text>
+            <path class="flow german go" style="--len:620;stroke-width:9" d="M700,95 C560,150 460,235 405,315" marker-end="url(#rh)"/>
+            <path class="flow german go d2" style="--len:650;stroke-width:9" d="M810,120 C690,190 560,255 470,330" marker-end="url(#rh)"/>
+            <path class="flow german go d3" style="--len:520;stroke-width:9" d="M560,100 C470,170 420,250 400,360" marker-end="url(#rh)"/>
+            <defs><marker id="rh" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#9a2c2c"/></marker></defs></svg></div>
+          <div class="pin" style="left:36%;top:61%" data-tip="Paris — the German objective"></div>
+          <div class="pin g" style="left:66%;top:17%" data-tip="German 1st Army (von Kluck)"></div>
+          <div class="pin" style="left:56%;top:38%" data-tip="Marne River line"></div>
+          <div class="cap">German 1st & 2nd Armies drive southwest across the Marne. Hover the pins; move your cursor to spotlight the field.</div>
+        </div>
+        <div class="rail rise r3" style="min-height:0;justify-content:center">
+          <div class="note g"><span class="k">The plan in motion</span><p>Kluck's 1st Army was the outer edge of a vast wheel meant to sweep west of Paris and encircle the French armies.</p></div>
+          <div class="note"><span class="k">The fatal turn</span><p>Instead Kluck turned <b>southeast</b> and crossed the Marne east of Paris on Sept 3 — bypassing the city instead of enveloping it.</p></div>
+          <div class="note a"><span class="k">Exhaustion</span><p>The Germans had marched ~40 km a day for weeks. Men and horses were spent; supply lines were stretched thin.</p></div>
+          <div class="factstrip" style="padding-top:3px"><span class="chip"><b>250 km</b> retreat</span><span class="chip"><b>Sept 2</b> govt flees</span><span class="chip"><b>40 km</b> to Paris</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 4 · THE GAP ===== -->
+  <section class="slide" id="s4">
+    <div class="pad">
+      <div class="eyebrow rise r1">September 9 · day five · the decisive opening</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">A <span class="ag">50 km gap</span> tears open the German line</h2>
+      <div style="display:grid;grid-template-columns:.9fr 1.6fr;gap:14px;flex:1;min-height:0">
+        <div class="rail rise r3" style="min-height:0;justify-content:center">
+          <div class="commander photoslot tilt" style="min-height:96px"><span class="glare"></span>
+            <img class="ph" src="aircraft.png" alt=""><div class="illus" style="background:#cdd7dd"><svg viewBox="0 0 220 100" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%"><rect width="220" height="100" fill="#cdd7dd"/><g stroke="#2a2518" stroke-width="3" fill="#2a2518"><line x1="40" y1="52" x2="180" y2="52"/><rect x="150" y="46" width="40" height="12" rx="4"/><line x1="70" y1="34" x2="120" y2="34"/><line x1="70" y1="70" x2="120" y2="70"/><line x1="95" y1="34" x2="95" y2="70"/><line x1="40" y1="46" x2="40" y2="58"/><circle cx="110" cy="80" r="5" fill="none"/></g></svg></div>
+            <div class="lab"><b>Blériot XI scout</b><span>The eyes that found the gap</span></div>
+          </div>
+          <div class="note g"><span class="k">Why it opened</span><p>As Kluck wheeled to meet Maunoury's new 6th Army to his west, his 1st Army pulled away from Bülow's 2nd Army beside it.</p></div>
+          <div class="note a"><span class="k">Eyes in the sky</span><p>British and French <b>aircraft</b> — one of the first decisive uses of air reconnaissance in history — spotted the widening gap.</p></div>
+          <div class="note"><span class="k">The thrust</span><p>The British Expeditionary Force and the French 5th Army (Franchet d'Espèrey) pushed straight into the opening, threatening both German armies with encirclement.</p></div>
+          <div class="factstrip" style="padding-top:3px"><span class="chip"><b>50 km</b> wide</span><span class="chip ab"><b>thinly</b> screened</span></div>
+        </div>
+        <div class="plate spotwrap photoslot rise r2" style="min-height:0"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="spot"></div>
+          <img class="ph" src="gap-map.png" alt="">
+          <div class="illus"><svg viewBox="0 0 760 520" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect width="760" height="520" fill="#efe7d2"/>
+            <path d="M160,110 q90,-34 190,8 q40,96 -24,186 q-128,24 -190,-48 Z" fill="#9a2c2c" opacity=".15" stroke="#9a2c2c" stroke-dasharray="6 6" stroke-width="2"/>
+            <path d="M470,120 q110,-14 190,48 q14,132 -74,206 q-138,-14 -176,-110 Z" fill="#9a2c2c" opacity=".15" stroke="#9a2c2c" stroke-dasharray="6 6" stroke-width="2"/>
+            <text x="190" y="156" fill="#9a2c2c" font-weight="800" font-size="17">1st ARMY</text><text x="520" y="166" fill="#9a2c2c" font-weight="800" font-size="17">2nd ARMY</text>
+            <rect x="356" y="140" width="70" height="250" rx="34" fill="#1f4f7d" opacity=".12"/><text x="330" y="120" fill="#1f4f7d" font-weight="800" font-size="16">THE GAP</text>
+            <circle class="ring go" cx="391" cy="265" r="52" stroke-width="4"/>
+            <path class="flow allied go" style="--len:380;stroke-width:12" d="M391,460 C391,380 391,310 391,200" marker-end="url(#bh)"/>
+            <text x="300" y="495" fill="#1f4f7d" font-weight="800" font-size="15">BEF + French 5th Army</text>
+            <defs><marker id="bh" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#1f4f7d"/></marker></defs></svg></div>
+          <div class="pin g" style="left:28%;top:30%" data-tip="1st Army — von Kluck"></div>
+          <div class="pin g" style="left:72%;top:32%" data-tip="2nd Army — von Bülow"></div>
+          <div class="pin a" style="left:51%;top:50%" data-tip="Allies pour into the gap"></div>
+          <div class="cap">The 50 km gap between the German 1st and 2nd Armies — and the Allied thrust driving into it.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 5 · TAXIS ===== -->
+  <section class="slide" id="s5">
+    <div class="pad">
+      <div class="eyebrow rise r1">Night of September 7–8 · the most famous moment</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">The <span class="ab">taxicabs</span> of the Marne</h2>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr auto;gap:12px;flex:1;min-height:0">
+        <div class="plate spotwrap photoslot rise r2" style="grid-row:1 / span 2;min-height:0"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="spot"></div>
+          <img class="ph" src="taxi.png" alt="">
+          <div class="illus" style="display:flex;align-items:center;justify-content:center;background:#efe7d2"><svg viewBox="0 0 560 320" preserveAspectRatio="xMidYMid meet" style="width:92%;height:92%" data-depth="6">
+            <rect x="0" y="250" width="560" height="70" fill="#cbbf9c"/><g stroke="#efe7d2" stroke-width="5" stroke-dasharray="26 22"><line x1="0" y1="286" x2="560" y2="286"/></g>
+            <g transform="translate(150,70)"><rect x="40" y="70" width="150" height="92" rx="6" fill="#1b1e25"/><rect x="54" y="80" width="52" height="40" rx="3" fill="#9fb4c2"/><path d="M190,92 L300,92 L300,162 L190,162 Z" fill="#2a2e38"/><rect x="196" y="100" width="46" height="34" rx="3" fill="#9fb4c2"/><rect x="300" y="118" width="20" height="44" fill="#2a2e38"/><circle cx="300" cy="120" r="9" fill="#e7c667"/><rect x="30" y="150" width="296" height="18" fill="#111318"/><circle cx="92" cy="176" r="30" fill="#15171c"/><circle cx="92" cy="176" r="13" fill="#8a7f61"/><circle cx="276" cy="176" r="30" fill="#15171c"/><circle cx="276" cy="176" r="13" fill="#8a7f61"/><rect x="60" y="52" width="120" height="20" rx="4" fill="#2a2e38"/><text x="150" y="46" text-anchor="middle" fill="#ac7d26" font-family="Georgia" font-size="15" font-style="italic">Renault AG-1 · 1914</text></g></svg></div>
+          <div class="cap">Over 600 Paris cabs ran soldiers to the front through the night — the first time automobiles carried troops into battle.</div>
+          <div class="stamp" style="right:14px;top:12px">Réquisition<br>Gallieni<br>7 Sept</div>
+        </div>
+        <div class="plate photoslot tilt rise r3" style="min-height:0"><span class="glare"></span><span class="corner tl"></span><span class="corner br"></span>
+          <img class="ph" src="taxi-color.png" alt=""><div class="illus" style="display:flex;align-items:center;justify-content:center;background:#e6dcc0"><p class="serif ab" style="font-style:italic;padding:10px;text-align:center">Renault AG-1 "Taxi de la Marne"</p></div>
+          <div class="cap">The red Renault AG-1 cabs — Paris's everyday taxis of 1914.</div>
+        </div>
+        <div class="plate rise r4" style="padding:12px 15px;display:flex;flex-direction:column;justify-content:center"><span class="corner tl"></span>
+          <p class="statbig ab" style="font-size:clamp(34px,5vw,64px)"><span id="taxiCount" data-target="6000">0</span></p>
+          <p class="muted" style="margin-top:1px">soldiers rushed ~50 km to Nanteuil-le-Haudouin.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="chip"><b>~600</b> cabs</span><span class="chip"><b>5</b> each</span><span class="chip"><b>70,012</b> fr billed</span></div>
+          <p style="margin-top:8px;font-size:12px"><b>The detail everyone remembers:</b> the cabs kept their meters running, and the treasury paid the fares.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 6 · COUNTERATTACK ===== -->
+  <section class="slide" id="s6">
+    <div class="pad">
+      <div class="eyebrow rise r1">September 6–12 · the Allies turn</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">The <span class="aa">counterattack</span> drives Germany back</h2>
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;flex:1;min-height:0">
+        <div class="plate spotwrap rise r2" style="min-height:0"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="spot"></div>
+          <svg viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect width="1000" height="520" fill="#efe7d2"/><path d="M40,50 L930,50 L950,470 L80,490 Z" fill="#e6dcc0" stroke="#c9ba96" stroke-width="2"/>
+            <path d="M250,140 C470,110 660,110 860,140" fill="none" stroke="#7fa6c0" stroke-width="4" opacity=".65"/><text x="600" y="108" fill="#5c7f99" font-family="Georgia" font-style="italic" font-size="18">Aisne R. — Germans retreat here</text>
+            <path d="M300,240 C480,205 650,195 840,225" fill="none" stroke="#7fa6c0" stroke-width="4.5"/><text x="560" y="190" fill="#5c7f99" font-family="Georgia" font-style="italic" font-size="20">Marne R.</text>
+            <circle cx="360" cy="320" r="11" fill="#17191f"/><text x="328" y="358" fill="#1b1e25" font-family="Georgia" font-weight="700" font-size="20">PARIS</text>
+            <text x="300" y="420" fill="#1f4f7d" font-weight="800" font-size="15">ALLIED COUNTERATTACK</text>
+            <path class="flow allied go" style="--len:420;stroke-width:9" d="M400,320 C440,240 480,180 520,140" marker-end="url(#bh2)"/>
+            <path class="flow allied go d2" style="--len:450;stroke-width:9" d="M500,340 C550,255 600,185 650,140" marker-end="url(#bh2)"/>
+            <path class="flow allied go d3" style="--len:420;stroke-width:9" d="M300,310 C320,235 350,180 400,140" marker-end="url(#bh2)"/>
+            <defs><marker id="bh2" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#1f4f7d"/></marker></defs></svg>
+          <div class="cap">The Allied armies strike north across the Marne, forcing a 65 km German retreat to the Aisne.</div>
+        </div>
+        <div class="rail rise r3" style="min-height:0;justify-content:center">
+          <div class="note a"><span class="k">Sept 6</span><p>Maunoury's 6th Army hits the German right along the Ourcq; the general offensive opens.</p></div>
+          <div class="note a"><span class="k">Sept 7–8</span><p>The taxis reinforce the flank; the BEF and 5th Army press into the gap.</p></div>
+          <div class="note g"><span class="k">Sept 9</span><p>Fearing encirclement, Col. Hentsch authorizes a German retreat in Moltke's name.</p></div>
+          <div class="note"><span class="k">Sept 12</span><p>Both sides halt at the Aisne and begin to dig in. Moltke tells the Kaiser: "Majesty, we have lost the war."</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 7 · WEAPONS ===== -->
+  <section class="slide" id="s7">
+    <div class="pad">
+      <div class="eyebrow rise r1">On the battlefield · tap any card</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">The weapons & technology that decided it</h2>
+      <div class="wgrid rise r2" style="flex:1;min-height:0;align-content:center">
+        <div class="wcard tilt" data-w><span class="glare"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="16" r="3"/><circle cx="18" cy="17" r="2"/><path d="M9.5 14 L20 7"/><path d="M14 5 L22 8"/></svg><h3>Artillery</h3><p class="wdesc">The French <b>75 mm field gun</b> fired up to 15 rounds a minute. Artillery caused most of the war's casualties.</p></div>
+        <div class="wcard tilt" data-w><span class="glare"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15 h11 l6 -2 v3 h-4"/><path d="M6 15 v3"/><path d="M9 11 v4"/></svg><h3>Machine guns</h3><p class="wdesc">400–600 rounds a minute from a single gun cut down whole waves of attackers in the open.</p></div>
+        <div class="wcard tilt" data-w><span class="glare"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18 L18 6"/><path d="M15 5 l3 -1 l-1 3"/><path d="M8 14 l2 2"/></svg><h3>Rifles</h3><p class="wdesc">Bolt-action rifles — French Lebel, German Mauser — armed every infantryman on the line.</p></div>
+        <div class="wcard tilt" data-w><span class="glare"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="4" width="14" height="12" rx="2"/><path d="M5 10 h14"/><circle cx="8.5" cy="19" r="1.6"/><circle cx="15.5" cy="19" r="1.6"/></svg><h3>Railroads</h3><p class="wdesc">Let Joffre shuttle whole armies across France to build the new 6th Army faster than Germans could march.</p></div>
+        <div class="wcard tilt" data-w><span class="glare"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 13 l20 -3 l-9 -2 l-4 -4"/><path d="M9 8 L7 13"/><path d="M4 13 v3 h7"/></svg><h3>Airplanes</h3><p class="wdesc">Scout planes gave the Allies their biggest edge — early aerial reconnaissance spotted the gap in the line.</p></div>
+        <div class="wcard tilt star" data-w><span class="glare"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 16 l1 -5 h12 l3 3 v2"/><path d="M4 11 l2 -3 h7 l2 3"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg><h3>Automobiles</h3><p class="wdesc">The Paris taxis: the first battlefield troop lift by car, and the lasting symbol of the Marne.</p></div>
+      </div>
+      <div class="factstrip rise r3"><span class="chip"><b>75mm</b> French gun</span><span class="chip"><b>600</b> rpm MG</span><span class="chip"><b>1st</b> big air-recon win</span><span class="chip"><b>Lebel</b> vs <b>Mauser</b></span></div>
+    </div>
+  </section>
+
+  <!-- ===== 8 · CASUALTIES + TRENCHES ===== -->
+  <section class="slide" id="s8">
+    <div class="pad">
+      <div class="eyebrow rise r1">The cost · and what came next</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">Half a million casualties, and the first trenches</h2>
+      <div style="display:grid;grid-template-columns:1fr 1.25fr;gap:14px;flex:1;min-height:0">
+        <div class="rail rise r2" style="min-height:0;justify-content:center">
+          <p class="statbig ag" style="font-size:clamp(44px,8vw,104px)"><span id="casCount" data-target="500000">0</span></p>
+          <p class="muted" style="margin-top:-2px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:11.5px">Estimated casualties, all sides</p>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:11px">
+            <div><div style="display:flex;justify-content:space-between;font-size:12.5px"><span class="aa" style="font-weight:700">France ~250,000</span></div><div class="bar"><span style="--w:100%;background:var(--allied)"></span></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12.5px"><span class="aa" style="font-weight:700">Britain ~13,000</span></div><div class="bar"><span style="--w:12%;background:var(--allied)"></span></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12.5px"><span class="ag" style="font-weight:700">Germany ~250,000+</span></div><div class="bar"><span style="--w:100%;background:var(--german)"></span></div></div>
+          </div>
+          <div class="note" style="margin-top:10px"><span class="k">Then they dug in</span><p>Neither side could outflank the other, so both entrenched — the birth of the Western Front.</p></div>
+        </div>
+        <div class="plate spotwrap photoslot rise r3" style="min-height:0"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="spot"></div>
+          <img class="ph" src="trenches.png" alt="">
+          <div class="illus" style="display:flex;align-items:center;justify-content:center;background:#d8cca8"><svg viewBox="0 0 600 320" preserveAspectRatio="xMidYMid meet" style="width:94%;height:94%" data-depth="6">
+            <rect width="600" height="320" fill="#d8cca8"/><path d="M0,120 L120,120 L120,230 L220,230 L220,120 L340,120 L340,230 L440,230 L440,120 L600,120 L600,320 L0,320 Z" fill="#8a7a55"/>
+            <path d="M0,120 L120,120 L120,230 L220,230 L220,120 L340,120 L340,230 L440,230 L440,120 L600,120" fill="none" stroke="#5e5236" stroke-width="4"/>
+            <g fill="#b7a97e" stroke="#8a7a55"><ellipse cx="40" cy="112" rx="22" ry="12"/><ellipse cx="86" cy="112" rx="22" ry="12"/><ellipse cx="500" cy="112" rx="22" ry="12"/><ellipse cx="546" cy="112" rx="22" ry="12"/></g>
+            <g fill="#2a2518"><circle cx="170" cy="150" r="12"/><rect x="160" y="162" width="20" height="40" rx="5"/><circle cx="390" cy="150" r="12"/><rect x="380" y="162" width="20" height="40" rx="5"/></g>
+            <text x="300" y="300" text-anchor="middle" fill="#efe7d2" font-family="Georgia" font-style="italic" font-size="20">The Western Front is born</text></svg></div>
+          <div class="cap">After the retreat, the armies entrenched. These first ditches grew into ~700 km of trenches and four years of stalemate.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 9 · SIGNIFICANCE ===== -->
+  <section class="slide" id="s9">
+    <div class="pad">
+      <div class="eyebrow rise r1">Why it mattered · the verdict of history</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">The Marne changed the entire war</h2>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;flex:1;min-height:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:11px;min-height:0">
+          <div class="plate tilt rise r2" style="padding:15px"><span class="glare"></span><span class="corner tl"></span><span class="corner br"></span><h3 class="aa">It saved Paris</h3><p class="muted" style="margin-top:6px">The German advance was halted 40 km from the capital and thrown back across the Marne. Paris never fell, and France stayed in the war.</p></div>
+          <div class="plate tilt rise r2" style="padding:15px"><span class="glare"></span><span class="corner tl"></span><span class="corner br"></span><h3 class="ag">It killed the Schlieffen Plan</h3><p class="muted" style="margin-top:6px">There would be no six-week knockout. Germany was now trapped in the long two-front war against France and Russia it had dreaded.</p></div>
+          <div class="plate tilt rise r3" style="padding:15px"><span class="glare"></span><span class="corner tl"></span><span class="corner br"></span><h3 class="ab">It created the stalemate</h3><p class="muted" style="margin-top:6px">The "Race to the Sea" and continuous trenches followed within weeks, freezing the Western Front in place for four years.</p></div>
+          <div class="plate tilt rise r3" style="padding:15px"><span class="glare"></span><span class="corner tl"></span><span class="corner br"></span><h3>It cost Germany its chief</h3><p class="muted" style="margin-top:6px">Moltke suffered a breakdown after the retreat and was quietly replaced by Erich von Falkenhayn on September 14, 1914.</p></div>
+        </div>
+        <div class="rail rise r4" style="min-height:0">
+          <div class="commander photoslot tilt" style="flex:1;min-height:150px"><span class="glare"></span>
+            <img class="ph" src="moltke.png" alt=""><div class="illus"><svg viewBox="0 0 220 200" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%"><rect width="220" height="200" fill="#cdbf9b"/><circle cx="110" cy="88" r="46" fill="#9a2c2c" opacity=".3"/><circle cx="110" cy="74" r="22" fill="#8a7f61"/><path d="M64 162 q46 -40 92 0 Z" fill="#8a7f61"/></svg></div>
+            <div class="lab"><b>Gen. von Moltke</b><span>German chief of staff, sacked after the defeat</span></div>
+          </div>
+          <div class="plate" style="padding:13px 15px"><span class="corner tl"></span><p class="serif" style="font-style:italic;font-size:clamp(15px,1.8vw,22px);color:var(--allied);line-height:1.25">"Majesty, we have lost the war."</p><p class="muted" style="margin-top:6px;font-size:13px">— Moltke to Kaiser Wilhelm II after the retreat.</p></div>
+          <div class="note"><span class="k">The long shadow</span><p>The war Moltke feared dragged on until November 1918 and cost millions of lives at Verdun, the Somme, and beyond.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 10 · AFTERMATH / LEGACY ===== -->
+  <section class="slide" id="s10">
+    <div class="pad">
+      <div class="eyebrow rise r1">The aftermath · what the Marne set in motion</div>
+      <h2 class="rise r1" style="margin:3px 0 10px">From six days to four years</h2>
+      <div style="display:grid;grid-template-rows:auto 1fr;gap:12px;flex:1;min-height:0">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px">
+          <div class="plate tilt rise r2" style="padding:13px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:22px">Sept 1914</p><h3 style="margin-top:2px">Race to the Sea</h3><p class="muted" style="margin-top:4px">Each army tried to outflank the other northward, stretching the front all the way to the English Channel.</p></div>
+          <div class="plate tilt rise r3" style="padding:13px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:22px">Oct–Nov</p><h3 style="margin-top:2px">First Ypres</h3><p class="muted" style="margin-top:4px">The last mobile battles of 1914 ground to a halt. Open, moving warfare was finished for years.</p></div>
+          <div class="plate tilt rise r4" style="padding:13px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:22px">1914–18</p><h3 style="margin-top:2px">Trench stalemate</h3><p class="muted" style="margin-top:4px">~700 km of trenches ran from the Channel to Switzerland, barely moving for four years.</p></div>
+          <div class="plate tilt rise r5" style="padding:13px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:22px">Legacy</p><h3 style="margin-top:2px">"Miracle of the Marne"</h3><p class="muted" style="margin-top:4px">France called it <i>le miracle de la Marne</i>, one of history's most decisive battles.</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;min-height:0">
+          <div class="plate spotwrap photoslot rise r4" style="min-height:0"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="spot"></div>
+            <img class="ph" src="aisne-trench.png" alt="">
+            <div class="illus" style="display:flex;align-items:center;justify-content:center;background:#d8cca8"><svg viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet" style="width:94%;height:94%"><rect width="600" height="300" fill="#d8cca8"/><path d="M0,110 L140,110 L140,210 L260,210 L260,110 L380,110 L380,210 L500,210 L500,110 L600,110 L600,300 L0,300 Z" fill="#8a7a55"/><path d="M0,110 L140,110 L140,210 L260,210 L260,110 L380,110 L380,210 L500,210 L500,110 L600,110" fill="none" stroke="#5e5236" stroke-width="4"/><g fill="#2a2518"><circle cx="200" cy="140" r="11"/><rect x="191" y="151" width="18" height="38" rx="5"/><circle cx="440" cy="140" r="11"/><rect x="431" y="151" width="18" height="38" rx="5"/></g></svg></div>
+            <div class="cap">British troops dug in at the Aisne, late September 1914 — the retreat halted here and the first permanent trench lines began.</div>
+          </div>
+          <div class="rail rise r5" style="min-height:0;justify-content:center">
+            <div class="note"><span class="k">Then the great battles</span><p>The deadlock led to Verdun and the Somme in 1916 — each costing hundreds of thousands of lives for a few kilometres of mud.</p></div>
+            <div class="note a"><span class="k">A second Marne</span><p>In July 1918, near the same river, the Allies won the Second Battle of the Marne — the turning point that finally ended the war.</p></div>
+            <div class="factstrip" style="padding-top:3px"><span class="chip"><b>700 km</b> of front</span><span class="chip"><b>4 years</b> stalemate</span><span class="chip"><b>Nov 1918</b> war ends</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 11 · QUIZ (6 questions, scored) ===== -->
+  <section class="slide" id="s11">
+    <div class="pad" style="justify-content:center;align-items:center">
+      <div class="eyebrow rise r1" style="align-self:flex-start">Quiz · answer all six</div>
+      <h2 class="rise r1" style="margin:3px 0 12px;align-self:flex-start">Test what you remember</h2>
+      <div class="plate rise r2" id="quizCard" style="padding:clamp(18px,3vw,30px);width:100%;max-width:960px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span class="chip" id="qProgress">Question 1 of 6</span>
+          <span class="chip" id="qScore">Score 0</span>
+        </div>
+        <h3 id="qText" style="font-size:clamp(18px,2.3vw,30px);line-height:1.2;margin-bottom:14px"></h3>
+        <div class="qopts" id="qOpts" style="max-width:none"></div>
+        <p class="qnote" id="qNote"></p>
+        <div style="margin-top:12px"><button class="go" id="qNext" style="display:none;padding:11px 22px;border:none;border-radius:10px;background:var(--ink);color:#fff;font-weight:700;cursor:pointer">Next question</button></div>
+      </div>
+      <div class="plate rise r2" id="quizResult" style="display:none;padding:clamp(24px,4vw,44px);text-align:center;width:100%;max-width:960px"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+        <p class="eyebrow">Your result</p>
+        <p class="statbig ab" id="qFinal" style="font-size:clamp(48px,9vw,104px);margin-top:6px">0 / 6</p>
+        <p class="lede" id="qVerdict" style="margin:10px auto 0;max-width:42ch"></p>
+        <div style="margin-top:18px"><button class="go" id="qRetry" style="padding:11px 22px;border:none;border-radius:10px;background:var(--brass);color:#fff;font-weight:700;cursor:pointer">Try again</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 12 · RECAP ===== -->
+  <section class="slide" id="s12">
+    <div class="pad">
+      <div class="eyebrow rise r1">In one slide</div>
+      <h2 class="rise r1" style="margin:3px 0 12px">The First Battle of the Marne</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px;flex:1;min-height:0;align-content:center">
+        <div class="plate tilt rise r2" style="padding:14px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:24px">01</p><p style="margin-top:3px"><b>When:</b> Sept 5–12, 1914, on the Marne east of Paris.</p></div>
+        <div class="plate tilt rise r2" style="padding:14px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:24px">02</p><p style="margin-top:3px"><b>Who:</b> France (Joffre, Gallieni) + Britain vs. Germany (Moltke, Kluck, Bülow).</p></div>
+        <div class="plate tilt rise r3" style="padding:14px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:24px">03</p><p style="margin-top:3px"><b>Turning point:</b> a 50 km gap opened; aircraft spotted it; the Allies poured in.</p></div>
+        <div class="plate tilt rise r3" style="padding:14px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:24px">04</p><p style="margin-top:3px"><b>Taxis:</b> ~600 Paris cabs rushed ~6,000 troops to the flank.</p></div>
+        <div class="plate tilt rise r4" style="padding:14px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:24px">05</p><p style="margin-top:3px"><b>Cost:</b> ~500,000 casualties; Germans retreat 65 km to the Aisne.</p></div>
+        <div class="plate tilt rise r4" style="padding:14px"><span class="glare"></span><span class="corner tl"></span><p class="ab serif" style="font-size:24px">06</p><p style="margin-top:3px"><b>Why it matters:</b> saved Paris, ended the Schlieffen Plan, began trench warfare.</p></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav" id="nav">
+  <span class="arrows" style="display:flex;gap:6px"><button id="prev" title="Previous">&lsaquo;</button><button id="next" title="Next">&rsaquo;</button></span>
+  <span class="count" id="count">1 / 12</span>
+  <button id="dl" title="Download this page as a single HTML file">&#8681;</button>
+  <button id="gear" title="Share & live sync setup">&#9881;</button>
+</div>
+<div class="hint" id="hint">Left / right arrows or space to move · gear to set up live class sync</div>
+
+<div class="overlay" id="overlay"><div class="panel">
+  <h3>Share, download &amp; live sync</h3>
+  <div class="tagrow"><span class="tag" id="roleTag">Role: self-navigate</span><span class="tag" id="syncTag">Sync: off</span></div>
+
+  <p style="font-weight:700;color:var(--ink);margin-top:8px">1 · Download the file</p>
+  <p>Save this whole presentation as a single <code>index.html</code>, then drop it (and your photo files) into your repository.</p>
+  <div class="row"><button class="go" id="dlPanel">Download index.html</button></div>
+
+  <p style="font-weight:700;color:var(--ink);margin-top:14px">2 · Put it online for free (GitHub Pages)</p>
+  <ol>
+    <li>Create a free public repo at <code>github.com/new</code>.</li>
+    <li>Upload <code>index.html</code> and all your <code>.png</code> photos into the repo root (same folder).</li>
+    <li>Open <b>Settings → Pages</b>. Under <b>Source</b> pick <b>Deploy from a branch</b>, branch <b>main</b>, folder <b>/ (root)</b>, then <b>Save</b>.</li>
+    <li>Wait about a minute. GitHub shows your public link: <code>https://yourname.github.io/your-repo/</code></li>
+  </ol>
+
+  <p style="font-weight:700;color:var(--ink);margin-top:14px">3 · Turn on free live sync (Firebase)</p>
+  <ol>
+    <li>Go to <code>console.firebase.google.com</code> and click <b>Add project</b> (free, no credit card). Name it, skip Google Analytics, Create.</li>
+    <li>In the left menu open <b>Build → Realtime Database</b>, then <b>Create Database</b>.</li>
+    <li>Pick any location, choose <b>Start in test mode</b>, and Enable.</li>
+    <li>Copy the database URL shown at the top (like <code>https://yourproject-default-rtdb.firebaseio.com</code>).</li>
+    <li>Test mode locks after 30 days. To keep it open for class, open the <b>Rules</b> tab, set it to <code>{ "rules": { ".read": true, ".write": true } }</code> and click <b>Publish</b>.</li>
+  </ol>
+  <div class="row"><input id="dbInput" placeholder="paste your database URL here"><input id="roomInput" placeholder="room" style="max-width:120px"><button class="go" id="applySync">Turn on sync</button></div>
+
+  <p style="font-weight:700;color:var(--ink);margin-top:14px">4 · Share the two links</p>
+  <p style="font-size:13px">Give the <b>viewer link</b> to your whole class and open the <b>presenter link</b> on your own laptop. When you change slides, every screen follows. Students can still hover and click to explore within your current slide.</p>
+  <div class="linkbox" id="viewerLink">turn on sync to generate your links</div>
+  <div class="linkbox" id="presLink">turn on sync to generate your links</div>
+
+  <div class="row"><button class="go" id="closeOverlay" style="background:var(--brass)">Done</button></div>
+</div></div>
+
+<script>
+const CONFIG = { dbUrl:"", room:"marne" };
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total = slides.length;
+let idx=0, es=null, isPresenter=false, synced=false;
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+if(params.get('db')) CONFIG.dbUrl=params.get('db');
+if(params.get('room')) CONFIG.room=params.get('room');
+isPresenter = location.hash.includes('present') || params.get('present')==='1';
+
+function go(n,fromSync){
+  n=Math.max(0,Math.min(total-1,n)); idx=n;
+  slides.forEach((s,i)=>s.classList.toggle('is-active',i===n));
+  $('count').textContent=(n+1)+' / '+total;
+  $('progress').style.width=((n+1)/total*100)+'%';
+  runSlide(slides[n]);
+  if(!fromSync && synced && isPresenter) publish(n);
+}
+const canDrive=()=>!synced||isPresenter;
+function next(){ if(canDrive()) go(idx+1); }
+function prev(){ if(canDrive()) go(idx-1); }
+$('next').onclick=next; $('prev').onclick=prev;
+document.addEventListener('keydown',e=>{
+  if($('overlay').classList.contains('show')){ if(e.key==='Escape') toggleOverlay(false); return; }
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){ e.preventDefault(); next(); }
+  else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); prev(); }
+  else if(e.key==='Escape') toggleOverlay(false);
+  else if(e.key.toLowerCase()==='s') toggleOverlay();
+});
+
+function runSlide(slide){ slide.querySelectorAll('[data-target]').forEach(el=>{ if(el.dataset.done) return; el.dataset.done='1'; countUp(el,+el.dataset.target); }); if(slide.id==='s11' && typeof quizReset==='function') quizReset(); }
+function countUp(el,target){ const dur=1500,t0=performance.now(),fmt=n=>n.toLocaleString('en-US');
+  (function tick(t){ const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3); el.textContent=fmt(Math.round(target*e)); if(p<1) requestAnimationFrame(tick); })(t0); }
+
+/* photo-over-illustration: if a .png is missing, hide the img so the drawing shows */
+document.querySelectorAll('.photoslot .ph').forEach(img=>{
+  img.addEventListener('error',()=>{ img.style.display='none'; });
+  if(img.complete && img.naturalWidth===0) img.style.display='none';
+});
+
+document.querySelectorAll('[data-side],[data-w]').forEach(c=> c.addEventListener('click',()=>c.classList.toggle('open')));
+
+/* ===== interactive 6-question quiz with scoring ===== */
+const QUIZ=[
+  {q:"When did the First Battle of the Marne take place?",o:["June 1915","September 5–12, 1914","March 1914","December 1916"],a:1,note:"It lasted six days, from September 5 to 12, 1914."},
+  {q:"What was Germany's plan to beat France in about six weeks?",o:["The Schlieffen Plan","Plan XVII","The Hindenburg Line","Operation Michael"],a:0,note:"The Schlieffen Plan aimed to take Paris and knock France out fast, before Russia was ready."},
+  {q:"What famously carried thousands of French soldiers to the front?",o:["Hot-air balloons","River barges","Paris taxicabs","Bicycles"],a:2,note:"About 600 Paris taxicabs rushed roughly 6,000 soldiers to the flank."},
+  {q:"What did the Allies exploit to turn the battle?",o:["A naval blockade","A 50 km gap between the German armies","A tunnel under the Marne","A sudden winter storm"],a:1,note:"A 50 km gap opened between the German 1st and 2nd Armies, and the Allies poured in."},
+  {q:"Which new technology first spotted that opening?",o:["Radar","Reconnaissance aircraft","Submarines","Tanks"],a:1,note:"Scout planes made one of the first decisive uses of air reconnaissance in history."},
+  {q:"What was the battle's biggest long-term result?",o:["A quick German victory","The fall of Paris","Years of trench-war stalemate","Russia leaving the war"],a:2,note:"The failed advance led to the Race to the Sea and four years of trench stalemate."}
+];
+let qi=0,score=0,qlocked=false;
+function quizReset(){ qi=0; score=0; qlocked=false; $('quizResult').style.display='none'; $('quizCard').style.display=''; renderQ(); }
+function renderQ(){ qlocked=false; const item=QUIZ[qi];
+  $('qProgress').textContent='Question '+(qi+1)+' of '+QUIZ.length;
+  $('qScore').textContent='Score '+score;
+  $('qText').textContent=item.q; $('qNote').textContent=''; $('qNext').style.display='none';
+  const letters=['A','B','C','D'], opts=$('qOpts'); opts.innerHTML='';
+  item.o.forEach((text,i)=>{ const b=document.createElement('button'); b.className='qopt'; b.innerHTML='<span class="key">'+letters[i]+'</span> '+text; b.onclick=()=>pick(i,b); opts.appendChild(b); });
+}
+function pick(i,btn){ if(qlocked) return; qlocked=true; const item=QUIZ[qi];
+  $('qOpts').querySelectorAll('.qopt').forEach((b,bi)=>{ if(bi===item.a) b.classList.add('correct'); else if(b===btn) b.classList.add('wrong'); });
+  if(i===item.a){ score++; $('qScore').textContent='Score '+score; }
+  $('qNote').textContent=(i===item.a?'Correct. ':'Not quite. ')+item.note;
+  $('qNext').textContent=(qi===QUIZ.length-1)?'See your score':'Next question'; $('qNext').style.display='';
+}
+$('qNext').onclick=()=>{ qi++; if(qi>=QUIZ.length) showResult(); else renderQ(); };
+function showResult(){ $('quizCard').style.display='none'; $('quizResult').style.display='';
+  $('qFinal').textContent=score+' / '+QUIZ.length;
+  let v; if(score>=6) v="Perfect — you know the Marne cold."; else if(score>=4) v="Strong work. You've got the big picture."; else if(score>=2) v="Not bad. Give it another run to lock it in."; else v="Give it another go — you've got this.";
+  $('qVerdict').textContent=v;
+}
+$('qRetry').onclick=quizReset;
+quizReset();
+
+/* cursor glow + crosshair everywhere */
+const glow=$('glow'), cross=$('crosshair');
+window.addEventListener('mousemove',e=>{ glow.style.left=e.clientX+'px'; glow.style.top=e.clientY+'px'; cross.style.left=e.clientX+'px'; cross.style.top=e.clientY+'px'; });
+
+/* whole-slide parallax */
+let mx=0,my=0,tx=0,ty=0;
+window.addEventListener('mousemove',e=>{ mx=(e.clientX/innerWidth-.5)*2; my=(e.clientY/innerHeight-.5)*2; });
+(function loop(){ tx+=(mx-tx)*.08; ty+=(my-ty)*.08;
+  slides[idx].querySelectorAll('[data-depth]').forEach(el=>{ const d=+el.dataset.depth; el.style.transform=`translate(${-tx*d}px, ${-ty*d}px)`; });
+  requestAnimationFrame(loop);
+})();
+
+/* 3d tilt + glare */
+document.querySelectorAll('.tilt').forEach(card=>{
+  card.addEventListener('mousemove',e=>{ const r=card.getBoundingClientRect(); const px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+    card.style.transform=`perspective(820px) rotateY(${(px-.5)*8}deg) rotateX(${-(py-.5)*8}deg)`; card.style.setProperty('--gx',(px*100)+'%'); card.style.setProperty('--gy',(py*100)+'%'); });
+  card.addEventListener('mouseleave',()=>{ card.style.transform=''; });
+});
+/* spotlight on plates */
+document.querySelectorAll('.spotwrap').forEach(m=> m.addEventListener('mousemove',e=>{ const r=m.getBoundingClientRect();
+  m.style.setProperty('--px',((e.clientX-r.left)/r.width*100)+'%'); m.style.setProperty('--py',((e.clientY-r.top)/r.height*100)+'%'); }));
+
+/* live sync (Firebase RTDB via REST + SSE, no SDK) */
+const base=()=>CONFIG.dbUrl.replace(/\/+$/,'')+'/rooms/'+encodeURIComponent(CONFIG.room)+'/state.json';
+function publish(n){ if(!CONFIG.dbUrl) return; fetch(base(),{method:'PUT',body:JSON.stringify({slide:n,t:Date.now()})}).then(()=>setDot('live')).catch(()=>setDot('err')); }
+function subscribe(){ if(!CONFIG.dbUrl) return; try{ es&&es.close(); es=new EventSource(base());
+  es.addEventListener('put',onMsg); es.addEventListener('patch',onMsg); es.onopen=()=>setDot('live'); es.onerror=()=>setDot('err'); }catch(e){ setDot('err'); } }
+function onMsg(e){ try{ const d=JSON.parse(e.data),data=d&&d.data; const slide=data&&(typeof data.slide==='number'?data.slide:(data.state&&data.state.slide));
+  if(typeof slide==='number'&&slide!==idx) go(slide,true); }catch(_){} }
+function enableSync(){ if(!CONFIG.dbUrl){ synced=false; return; } synced=true;
+  document.body.classList.toggle('viewer-locked',!isPresenter);
+  $('modeLabel').textContent=isPresenter?'Presenter · live':'Following presenter';
+  if(isPresenter){ setDot('live'); publish(idx); } else subscribe(); refreshPanel(); }
+function setDot(s){ $('statusDot').className='dot'+(s==='live'?' live':s==='err'?' err':''); }
+
+function toggleOverlay(force){ const o=$('overlay'); const show=(force===undefined)?!o.classList.contains('show'):force; o.classList.toggle('show',show); if(show) refreshPanel(); }
+$('gear').onclick=()=>toggleOverlay(); $('closeOverlay').onclick=()=>toggleOverlay(false);
+/* download the page as a file */
+function download(){ const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML; const blob=new Blob([html],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='index.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{ a.remove(); URL.revokeObjectURL(a.href); },100); }
+$('dl').onclick=download; $('dlPanel').onclick=download;
+$('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) toggleOverlay(false); });
+$('applySync').onclick=()=>{ const db=$('dbInput').value.trim(),room=$('roomInput').value.trim()||'marne'; if(!db){ $('dbInput').focus(); return; } CONFIG.dbUrl=db; CONFIG.room=room; enableSync(); refreshPanel(); };
+function linkFor(p){ const u=new URL(location.href.split('#')[0]); u.searchParams.set('db',CONFIG.dbUrl); u.searchParams.set('room',CONFIG.room); return u.toString()+(p?'#present':''); }
+function refreshPanel(){ $('dbInput').value=CONFIG.dbUrl; $('roomInput').value=CONFIG.room;
+  $('roleTag').textContent='Role: '+(isPresenter?'presenter':'viewer'); const on=!!CONFIG.dbUrl;
+  $('syncTag').textContent='Sync: '+(on?'on':'off'); $('syncTag').classList.toggle('on',on); $('roleTag').classList.toggle('on',isPresenter);
+  if(on){ $('viewerLink').textContent='VIEWER (class): '+linkFor(false); $('presLink').textContent='PRESENTER (you): '+linkFor(true); } }
+[['viewerLink',false],['presLink',true]].forEach(([id,p])=> $(id).addEventListener('click',()=>{ if(!CONFIG.dbUrl) return; navigator.clipboard&&navigator.clipboard.writeText(linkFor(p)); $(id).textContent='Copied!'; setTimeout(refreshPanel,900); }));
+
+if(isPresenter){ $('modeLabel').textContent='Presenter'; $('hint').textContent='You control the slides · left / right arrows or space'; }
+go(0);
+if(CONFIG.dbUrl) enableSync();
+setTimeout(()=> $('hint').style.opacity='0',6500);
+</script>
+</body>
+</html>
