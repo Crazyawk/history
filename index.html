@@ -1,6 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+(function () {
+  // Same role logic the deck uses — viewers are everyone without the presenter flag.
+  var params = new URLSearchParams(location.search);
+  var isPresenter = location.hash.includes('present') || params.get('present') === '1';
+  if (isPresenter) return; // presenter keeps the full bottom bar, no Welcome gate
+
+  // --- Viewer only: hide the bar except the slide number ---
+  var style = document.createElement('style');
+  style.textContent =
+    '#nav .arrows,#dl,#gear,#hint{display:none !important;}';
+  document.head.appendChild(style);
+
+  // --- Viewer only: Welcome gate that fullscreens on click ---
+  var gate = document.createElement('div');
+  gate.id = 'welcomeGate';
+  gate.innerHTML = '<div class="wg-inner">' +
+      '<p class="wg-eyebrow">World War I · 1914</p>' +
+      '<h1 class="wg-title">Welcome</h1>' +
+      '<p class="wg-sub">Click anywhere to begin</p>' +
+    '</div>';
+  var gcss = document.createElement('style');
+  gcss.textContent =
+    '#welcomeGate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;' +
+      'justify-content:center;cursor:pointer;background:#f1ead9;color:#1b1e25;' +
+      'opacity:1;transition:opacity .7s ease;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}' +
+    '#welcomeGate.hide{opacity:0}' +
+    '#welcomeGate .wg-inner{text-align:center;transform:translateY(0);transition:transform .7s ease}' +
+    '#welcomeGate.hide .wg-inner{transform:translateY(-12px)}' +
+    '#welcomeGate .wg-eyebrow{font-weight:800;letter-spacing:.24em;text-transform:uppercase;' +
+      'font-size:13px;color:#ac7d26;margin-bottom:10px}' +
+    '#welcomeGate .wg-title{font-family:Georgia,"Times New Roman",serif;font-weight:700;' +
+      'font-size:clamp(48px,10vw,120px);line-height:.95;letter-spacing:-.015em}' +
+    '#welcomeGate .wg-sub{margin-top:16px;color:#565a68;font-size:15px;' +
+      'animation:wgpulse 2s ease-in-out infinite}' +
+    '@keyframes wgpulse{0%,100%{opacity:.55}50%{opacity:1}}';
+  document.head.appendChild(gcss);
+  document.body.appendChild(gate);
+
+  gate.addEventListener('click', function () {
+    // fullscreen must happen inside this click (user gesture) — this is the one place it's allowed
+    var el = document.documentElement;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req && !document.fullscreenElement) req.call(el).catch(function () {});
+    // seamless fade out, then remove
+    gate.classList.add('hide');
+    setTimeout(function () { gate.remove(); }, 750);
+  }, { once: true });
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>The First Battle of the Marne</title>
